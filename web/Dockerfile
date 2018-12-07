@@ -1,7 +1,7 @@
 # BUILD
 FROM golang:1.9.1-alpine3.6 as builder
 
-COPY /codefresh/volume/k8s-wordsmith-demo/web/dispatcher.go .
+COPY --from=builder dispatcher.go .
 RUN go build dispatcher.go
 
 # RUN
