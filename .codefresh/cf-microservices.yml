@@ -63,8 +63,7 @@ steps:
     image: codefresh/cfstep-helm
     stage: test
     commands:
-      - echo 'Sending request to http:\/\/${{WEB_ENDPOINT_IP}}):8081\/'
-      - cf_export INTEGRATION_TEST=$(curl --write-out %{http_code} --silent --output \/dev\/null 'http://${{WEB_ENDPOINT_IP}}):8081/' )
+      - cf_export INTEGRATION_TEST=$(curl --write-out %{http_code} --silent --output \/dev\/null 'http://${{WEB_ENDPOINT_IP}}:8081/' )
     on_success:
       metadata:
         set:
