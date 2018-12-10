@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-This shouldn't be here
-
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
