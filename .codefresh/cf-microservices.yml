@@ -1,0 +1,48 @@
+version: '1.0'
+steps:
+#   UnitTestting:
+#     title: Unit Testing
+#     description: Performing unit tests on /web...
+#     image: golang:latest
+#     working_directory: ${{main_clone}}
+#     commands:
+#     - cd web && gofmt -e dispatcher.go
+#   BuildingDockerImage:
+#     title: Building Docker Image
+#     type: build
+#     image_name: dockersamples/k8s-wordsmith-web
+#     working_directory: ./web/
+#     tag: '${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}'
+#     dockerfile: Dockerfile
+#     metadata:
+#       set:
+#         - unit_tests_passed: true
+#   PushingToDockerRegistry:
+#     title: Pushing to Docker Registry
+#     type: push
+#     candidate: '${{BuildingDockerImage}}'
+#     tag: '${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}'
+#     registry: cfcr
+#   DeployHelmChart:
+#     image: 'codefresh/cfstep-helm:2.9.1'
+#     title: Deploying Helm Chart
+#     environment:
+#       - CHART_REF=k8s-wordsmith-demo-chart
+#       - CHART_REPO_URL=cm://h.cfcr.io/luisledezma/default
+#       - CHART_VERSION=0.1.0
+#       - RELEASE_NAME=k8s-wordsmith-demo-${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
+#       - KUBE_CONTEXT='${{KUBE_CONTEXT}}'
+#       - NAMESPACE='${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}'
+#       - DEBUG_CHART=true
+#       - VALUE_imageCredentials_registry='${{CFCR_REGISTRY}}'
+#       - VALUE_imageCredentials_username='${{CFCR_USERNAME}}'
+#       - VALUE_imageCredentials_password='${{CFCR_PASSWORD}}'
+#       - VALUE_services_web_image=r.cfcr.io/luisledezma/dockersamples/k8s-wordsmith-web:${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
+#       - VALUE_services_db_image=r.cfcr.io/luisledezma/dockersamples/k8s-wordsmith-db
+#       - VALUE_services_words_image=r.cfcr.io/luisledezma/dockersamples/k8s-wordsmith-api
+  GetKubernetesServicesEndpoints:
+    title: Getting Kubernetes Services Endpoints
+    image: codefresh/cfstep-helm
+    commands:
+      - kubectl config use-context ${{KUBE_CONTEXT}}
+      - bash -c 'IFS=" " read -a services <<< "${{SERVICES}}" && for service in "${services[@]}"; do external_ip=""; while [ -z $external_ip ]; do echo "Waiting for end point... from kubectl get svc k8s-wordsmith-demo-${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}-${service} --namespace ${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}} --template=\"{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}\""; external_ip=$(kubectl get svc k8s-wordsmith-demo-${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}-${service} --namespace ${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}} --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); [ -z "$external_ip" ] && sleep 10; done; echo "End point ready-" && echo $external_ip; cf_export ${service^^}_ENDPOINT_IP=$external_ip; done'
