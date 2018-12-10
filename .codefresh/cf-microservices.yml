@@ -2,8 +2,8 @@ version: '1.0'
 stages:
   - pre-build
   - build
-  - test
   - deploy
+  - test
 steps:
   UnitTestting:
     title: Unit Testing
@@ -40,7 +40,7 @@ steps:
       - CHART_REPO_URL=cm://h.cfcr.io/luisledezma/default
       - CHART_VERSION=0.1.0
       - RELEASE_NAME=k8s-wordsmith-demo-${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}
-      - KUBE_CONTEXT='${{KUBE_CONTEXT}}'
+      - KUBE_CONTEXT=${{KUBE_CONTEXT}}
       - NAMESPACE='${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}}'
       - DEBUG_CHART=true
       - VALUE_imageCredentials_registry='${{CFCR_REGISTRY}}'
