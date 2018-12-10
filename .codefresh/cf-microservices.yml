@@ -67,6 +67,6 @@ steps:
     on_success:
       metadata:
         set:
-          - ${{BuildingDockerImage}}:
+          - ${{BuildingDockerImage.imageId}}:
             - integration_tests_passed:
                 evaluate: "'${{INTEGRATION_TEST}}' == '200'"
