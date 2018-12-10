@@ -1,0 +1,18 @@
+version: '1.0'
+stages:
+- build
+- deploy
+steps:
+  BuildingDockerImage:
+    title: Building Docker Image
+    type: build
+    stage: build
+    image_name: dockersamples/k8s-wordsmith-db
+    working_directory: ./db/
+    dockerfile: Dockerfile
+  PushingToDockerRegistry:
+    title: Pushing to Docker Registry
+    type: push
+    stage: build
+    candidate: '${{BuildingDockerImage}}'
+    registry: cfcr

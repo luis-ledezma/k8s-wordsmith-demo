@@ -34,6 +34,7 @@ steps:
   DeployHelmChart:
     image: 'codefresh/cfstep-helm:2.9.1'
     title: Deploying Helm Chart
+    description: Microservices deployment process
     stage: deploy
     environment:
       - CHART_REF=k8s-wordsmith-demo-chart
@@ -58,12 +59,14 @@ steps:
       - bash -c 'IFS=" " services=("web") && for service in "${services[@]}"; do external_ip=""; while [ -z $external_ip ]; do echo "Waiting for end point... from kubectl get svc ${service} --namespace ${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}} --template=\"{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}\""; external_ip=$(kubectl get svc ${service} --namespace ${{CF_BRANCH_TAG_NORMALIZED}}-${{CF_SHORT_REVISION}} --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}"); [ -z "$external_ip" ] && sleep 10; done; echo "End point ready-" && echo $external_ip; cf_export ${service^^}_ENDPOINT_IP=$external_ip; done'
   IntegrationTest:
     title: Running Endpoint Test
+    description: Sending a request to endpoint for availability check
     image: codefresh/cfstep-helm
     stage: test
     commands:
-      - cf_export INTEGRATION_TEST=$(curl --write-out %{http_code} --silent --output /dev/null http://${{WEB_ENDPOINT_IP}}):8081/)
-    metadata:
-      set:
-        - ${{BuildingDockerImage}}:
-          - integration_tests_passed:
-              evaluate: "'${{INTEGRATION_TEST}}' == '200'"
+      - cf_export INTEGRATION_TEST=$(curl --write-out %{http_code} --silent --output /dev/null 'http://${{WEB_ENDPOINT_IP}}):8081/' )
+    on_success:
+      metadata:
+        set:
+          - ${{BuildingDockerImage}}:
+            - integration_tests_passed:
+                evaluate: "'${{INTEGRATION_TEST}}' == '200'"
